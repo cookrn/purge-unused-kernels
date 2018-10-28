@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+
+currentkernelversion=$(uname -r | sed -r 's/-[a-z]+//')
+unusedkernelversions=$(dpkg -l linux-{image,headers}-"[0-9]*" | awk '/ii/{print $2}' | grep -ve $currentkernelversion)
+
+echo "CURRENT: $currentkernelversion"
+echo
+echo "UNUSED:"
+echo "$unusedkernelversions"
+echo
+
+if [[ "-f" == $1 ]]; then
+  confirmation="Y"
+else
+  read -p "Are you sure you want to continue? Have you read what this script does?! " confirmation
+fi
+
+case $confirmation in
+  [yY]* ) sudo apt-get purge $unusedkernelversions;;
+  * ) exit;;
+esac
+
